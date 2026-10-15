@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A3B69">
+<title>Investigación de Operaciones · UMG</title>
+<meta name="description" content="Plataforma educativa de Investigación de Operaciones: Simplex, método gráfico, M, dos fases y más, con resolvedor paso a paso. Universidad Mariano Gálvez de Guatemala.">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<noscript><p style="padding:16px;background:#FFF6D6">Activa JavaScript para usar la plataforma.</p></noscript>
+
+<div id="intro"><img class="il" src="logo.png" alt="" width="130" height="130"><div class="ig" aria-hidden="true"><span>I</span><span>O</span></div><p>Investigación de Operaciones · UMG</p></div>
+
+<aside id="side" aria-label="Menú de temas">
+<a class="brand" href="#/home"><img src="logo.png" alt="Escudo de la Universidad Mariano Gálvez" width="64" height="64"><span><b>IO</b> UMG<small>Investigación de Operaciones</small></span></a>
+<nav id="nav"></nav>
+<div class="prog"><div class="pl"><span>Tu progreso</span><b id="pTxt">0/12</b></div><div class="pb"><i id="pBar"></i></div></div>
+</aside>
+<div id="scrim"></div>
+
+<div class="main">
+<header class="topbar">
+<button class="ib" id="bMenu" aria-label="Abrir menú"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<div class="tt" id="tt">Inicio</div>
+<div class="tr"><button class="nb" id="bTut">Tutorial</button><button class="nb" id="bAbout">Quién lo hizo</button></div>
+</header>
+<main id="view"></main>
+<footer class="foot">Hecho por Darwin Danilo Castro Garcia · Carné 0903-20-6780 · Universidad Mariano Gálvez de Guatemala</footer>
+</div>
+
+<div id="toast" role="status"></div>
+<div id="tut"><div id="spot"></div><div id="tip" role="dialog" aria-live="polite"><h3 id="th"></h3><p id="tp"></p><div class="tc"><div class="dots" id="dots"></div><div class="tb"><button id="tSkip">Saltar</button><button id="tPrev">Atrás</button><button class="go" id="tNext">Siguiente</button></div></div></div></div>
+
+<dialog id="about" aria-labelledby="an">
+<div class="ah"><img class="aseal" src="logo.png" alt="" width="84" height="84"><p>Proyecto de Investigación de Operaciones</p></div>
+<div class="ab"><div class="ac"><h2 id="an">Darwin Danilo Castro Garcia</h2><p>Universidad Mariano Gálvez de Guatemala</p><div class="cn">Carné 0903-20-6780</div></div>
+<button class="btn red" id="aClose">Cerrar</button></div>
+</dialog>
+
+<script src="solver.js"></script>
+<script src="graph.js"></script>
+<script src="topics.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
