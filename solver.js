@@ -66,11 +66,14 @@ function snap(T, c, label, zl) {
   return { phase: label, zl, cols: T.cols.map(x => x.name), A: T.A.map(r => r.slice()), b: T.b.slice(), basis: T.basis.map(j => T.cols[j].name), r0, zv, enter: -1, leave: -1, ratios: null, msg: '', kind: 'iter' };
 }
 function run(T, c, steps, ctx, label, zl) {
-  for (let it = 0; it < 80; it++) {
+  let stall = 0, bland = false, lastZ = null;
+  for (let it = 0; it < 200; it++) {
     const s = snap(T, c, label, zl); steps.push(s);
     if (T.b.some(v => Math.abs(v) < EPS)) ctx.degenerate = true;
+    stall = lastZ && pcmp(s.zv, lastZ) === 0 ? stall + 1 : 0; lastZ = s.zv;
+    if (stall >= 4 && !bland) { bland = true; ctx.bland = true; }
     let e = -1;
-    s.r0.forEach((v, j) => { if (pcmp(v, Z0) < 0 && (e < 0 || pcmp(v, s.r0[e]) < 0)) e = j; });
+    s.r0.forEach((v, j) => { if (pcmp(v, Z0) < 0 && (e < 0 || (!bland && pcmp(v, s.r0[e]) < 0))) e = j; });
     if (e < 0) { s.kind = 'opt'; s.msg = 'Ningún valor de la fila Z es negativo: ¡llegamos al óptimo!'; return { status: 'optimal', r0: s.r0 }; }
     const ratios = T.A.map((row, i) => row[e] > EPS ? T.b[i] / row[e] : null);
     let l = -1, best = Infinity, ties = 0;
@@ -83,7 +86,8 @@ function run(T, c, steps, ctx, label, zl) {
     if (l < 0) { s.kind = 'unb'; s.msg = `${T.cols[e].name} puede crecer sin límite porque ninguna fila lo frena (no hay valores positivos en su columna). ¡Solución no acotada!`; return { status: 'unbounded' }; }
     if (ties > 1) ctx.degenerate = true;
     s.leave = l;
-    s.msg = `Entra ${T.cols[e].name} (el más negativo de la fila Z: ${fp(s.r0[e])}). Sale ${T.cols[T.basis[l]].name} (razón mínima ${fr(best)}). El pivote es ${fr(T.A[l][e])}.` + (ties > 1 ? ' ¡Hay empate en la razón mínima! Eso produce degeneración: la próxima variable básica valdrá 0.' : '');
+    s.info = { eName: T.cols[e].name, lName: T.cols[T.basis[l]].name, ev: s.r0[e].slice(), best, pv: T.A[l][e], ties, bland };
+    s.msg = `Entra ${T.cols[e].name} (el más negativo de la fila Z: ${fp(s.r0[e])}). Sale ${T.cols[T.basis[l]].name} (razón mínima ${fr(best)}). El pivote es ${fr(T.A[l][e])}.` + (ties > 1 ? ' ¡Hay empate en la razón mínima! Eso produce degeneración: la próxima variable básica valdrá 0.' : '') + (bland ? ' (Z no mejoraba: se usa la regla de Bland, que elige la variable de menor índice, para evitar ciclos.)' : '');
     pivot(T, l, e);
   }
   return { status: 'cycling' };
@@ -117,6 +121,11 @@ function solve(p, method) {
   } else {
     c = cvec(T, 2, method);
     st = run(T, c, res.steps, ctx, method === 'bigM' ? 'Método de la M' : 'Simplex', zl);
+  }
+  if (st.status === 'unbounded' && T.basis.some((bj, i) => T.cols[bj].t === 'a' && T.b[i] > 1e-7)) {
+    const ls = res.steps[res.steps.length - 1]; ls.kind = 'opt';
+    ls.msg = 'Aunque una columna no tiene valores positivos, una variable artificial sigue positiva en la base: el problema no tiene solución factible.';
+    res.status = 'infeasible'; res.msg = 'Una variable artificial quedó con valor positivo: las restricciones se contradicen.'; return res;
   }
   if (st.status === 'unbounded') { res.status = 'unbounded'; res.msg = 'Z crece sin límite: falta una restricción que lo frene.'; return res; }
   if (st.status !== 'optimal') { res.status = st.status; res.msg = 'El método dio demasiadas vueltas (posible ciclo).'; return res; }
@@ -162,6 +171,50 @@ function heuristic(p) {
   return { ok: true, x, z: evalZ(p, x), steps, order };
 }
 
-root.IO = { solve, heuristic, fr, fp, evalZ };
+/* ---------- utilidades para explicar ---------- */
+const SUB = '₀₁₂₃₄₅₆₇₈₉', nmv = (ch, i) => ch + SUB[i];
+function terms(co, names) {
+  let s = '';
+  co.forEach((v, j) => { if (Math.abs(v) < EPS) return; const a = Math.abs(v), c = Math.abs(a - 1) < EPS ? '' : fr(a); s += (s === '' ? (v < 0 ? '−' : '') : (v < 0 ? ' − ' : ' + ')) + c + names[j]; });
+  return s || '0';
+}
+function describe(p, method) {
+  const xs = p.c.map((_, j) => nmv('x', j + 1)), SY = { '<=': '≤', '>=': '≥', '=': '=' };
+  const hasArt = p.cons.some(needsArt), m = !method || method === 'auto' ? (hasArt ? 'twophase' : 'simplex') : method;
+  const model = [(p.type === 'max' ? 'Maximizar' : 'Minimizar') + ' Z = ' + terms(p.c, xs), 'Sujeto a:']
+    .concat(p.cons.map((r, i) => '  R' + (i + 1) + ': ' + terms(r.a, xs) + ' ' + SY[r.op] + ' ' + fr(r.b))).concat(['  ' + xs.join(', ') + ' ≥ 0']);
+  const zs = p.type === 'min' ? terms(p.c.map(v => -v), xs) : terms(p.c, xs), std = [], arts = [];
+  std.push(p.type === 'min' ? 'Como minimizamos, usamos Z′ = −Z y MAXIMIZAMOS:  Máx Z′ = ' + zs : 'Máx Z = ' + zs);
+  p.cons.forEach((r, i) => {
+    let a = r.a, b = r.b, op = r.op, note = '';
+    if (b < 0) { a = a.map(v => -v); b = -b; op = flip(op); note = '   (R' + (i + 1) + ' se multiplicó por −1 para que el lado derecho sea positivo)'; }
+    const sv = nmv('s', i + 1), av = nmv('a', i + 1); let left = terms(a, xs);
+    if (op === '<=') left += ' + ' + sv; else if (op === '>=') { left += ' − ' + sv + ' + ' + av; arts.push(av); } else { left += ' + ' + av; arts.push(av); }
+    std.push('R' + (i + 1) + ': ' + left + ' = ' + fr(b) + note);
+  });
+  std.push('s = variable de holgura (lo que sobra del recurso) o de exceso. a = variable artificial (solo ayuda a arrancar).');
+  if (arts.length && m === 'bigM') std.push('Método de la M: Máx Z′ = ' + zs + ' − M(' + arts.join(' + ') + ')   (M es un número enorme que castiga a las artificiales)');
+  if (arts.length && m === 'twophase') std.push('Fase 1: Mín W = ' + arts.join(' + ') + ' (hacer cero las artificiales).  Fase 2: se quitan y se optimiza Z′.');
+  if (arts.length && m === 'simplex') std.push('Ojo: hay artificiales, así que el Simplex normal no alcanza. Usa el Método de la M o dos fases.');
+  if (!arts.length) std.splice(std.length - 1, 1, 's = variable de holgura: lo que sobra de cada recurso.');
+  return { model, std, method: m, hasArt: arts.length > 0 };
+}
+function check(p, x) {
+  const rows = p.cons.map((r, i) => { const lhs = r.a.reduce((s, v, j) => s + v * x[j], 0); const ok = r.op === '<=' ? lhs <= r.b + 1e-7 : r.op === '>=' ? lhs >= r.b - 1e-7 : Math.abs(lhs - r.b) < 1e-7; return { i, lhs, op: r.op, b: r.b, ok }; });
+  const nn = x.every(v => v >= -1e-9);
+  return { rows, ok: rows.every(r => r.ok) && nn, z: evalZ(p, x) };
+}
+function classify(p, m) {
+  const r = solve(p, m || 'auto');
+  return r.status === 'unbounded' ? 'unb' : r.status === 'infeasible' ? 'inf' : r.status === 'multiple' ? 'alt' : r.status === 'optimal' ? (r.degenerate ? 'deg' : 'uni') : 'other';
+}
+function parseNum(s) {
+  s = String(s).trim().replace(/−/g, '-').replace(',', '.'); let m;
+  if (/^-?\d+(\.\d+)?$/.test(s)) return { v: parseFloat(s), dec: s.indexOf('.') >= 0 };
+  if ((m = s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/)) && parseFloat(m[2]) !== 0) return { v: parseFloat(m[1]) / parseFloat(m[2]), dec: false };
+  return { v: NaN, dec: false };
+}
+
+root.IO = { solve, heuristic, fr, fp, evalZ, describe, check, classify, parseNum, terms };
 if (typeof module !== 'undefined') module.exports = root.IO;
 })(typeof window !== 'undefined' ? window : globalThis);

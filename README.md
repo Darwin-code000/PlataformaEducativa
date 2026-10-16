@@ -26,11 +26,13 @@ Plataforma web para aprender Investigación de Operaciones con animaciones, lecc
 - Hasta 5 variables y 6 restricciones (≤, ≥, =), maximizar o minimizar.
 - Métodos: Simplex, Método de la M, Dos fases (o automático), gráfico (2 variables) y heurística.
 - Tablas del Simplex paso a paso con la columna y la fila pivote resaltadas, con fracciones exactas y la M escrita en la fila Z.
+- Muestra el modelo escrito, la forma estándar, la comprobación de la solución y permite elegir la convención de la fila Z (Zⱼ−Cⱼ o Cⱼ−Zⱼ).
+- Avisa si falta algún dato en vez de suponer 0.
 - Detecta y explica: solución óptima, óptimos alternativos, degeneración, solución no acotada y no factible.
 
 ## Funciones de la plataforma
 
-Tutorial de entrada, lección guiada y pregunta en cada tema, progreso guardado en el navegador, menú lateral con los colores de la UMG y diseño adaptable a celular.
+Tutorial de entrada, lección guiada, **ejemplo resuelto paso a paso**, **ejercicios con corrección** y pregunta final en cada tema, progreso guardado en el navegador, menú lateral con los colores de la UMG y diseño adaptable a celular.
 
 ## Estructura
 
@@ -49,9 +51,16 @@ Tutorial de entrada, lección guiada y pregunta en cada tema, progreso guardado 
 
 No necesita instalación: abre `index.html` en el navegador. Para publicarlo, sube todos los archivos a la raíz de un repositorio y activa GitHub Pages.
 
-## Autor
+## Integrantes
 
-**Darwin Danilo Castro Garcia** · Carné 0903-20-6780
+| Nombre | Carné |
+|---|---|
+| Darwin Danilo Castro García | 0903-20-6780 |
+| Froilan Aldair Ardeano Miranda | 0903-23-3982 |
+| Kenedy de Jesús Orozco Salvador | 0903-24-16532 |
+| Brallan José Danilo Marroquin Lopez | 0903-24-12842 |
+| Carlos Armando López de Leon | 0903-08-11993 |
+| Emerson Desaylí Orozco Salvador | 0903-24-16049 |
 
 ## Uso de inteligencia artificial
 

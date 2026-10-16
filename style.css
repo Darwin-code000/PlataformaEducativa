@@ -102,7 +102,7 @@ button{cursor:pointer;touch-action:manipulation}
 .ti h3{font-size:19px;margin:8px 0 4px;color:var(--blue)}.ti p{line-height:1.5;color:#2B4560}
 
 /* solver */
-.sset{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.sset{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:18px}
 .fld>span{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:var(--mut)}
 select,.fld input{width:100%;min-height:48px;border:2px solid var(--line);border-radius:14px;padding:0 12px;font-size:16px;background:#fff;color:var(--ink)}
 .stp{display:flex;align-items:center;border:2px solid var(--line);border-radius:14px;height:48px;overflow:hidden;background:#fff}
@@ -197,3 +197,36 @@ dialog::backdrop{background:rgba(6,22,66,.7);backdrop-filter:blur(6px)}dialog[op
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
 #solver,#sres{scroll-margin-top:84px}
 .tban h1,.tban p{color:#fff}.tban p{color:#C9D6F7}
+
+/* ejemplos resueltos, ejercicios, equipo */
+.lnk{background:none;border:0;color:var(--blue2);font-weight:600;font-size:inherit;text-decoration:underline;cursor:pointer;padding:8px 4px;min-height:44px}
+.sh{font-size:17px;color:var(--blue);margin:18px 0 8px}
+.mdl{background:var(--bg);border:1px solid var(--line);border-left:5px solid var(--blue2);border-radius:12px;padding:14px 16px;line-height:1.8;font-size:16px;overflow-x:auto;white-space:nowrap}
+.cap{font-size:14px;color:var(--mut);margin-top:8px}
+.wl{margin-top:18px}
+.ws{display:flex;gap:14px;margin-bottom:16px;animation:in .6s var(--ease)}
+.wn{flex:none;width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;font-weight:800;display:grid;place-items:center;margin-top:2px}
+.wb{flex:1;min-width:0}.wb h3{font-size:18px;color:var(--blue);margin-bottom:8px}.wb p{line-height:1.55;margin-bottom:8px}
+.wb .ban{margin-top:6px}
+.ex{border:2px solid var(--line);border-radius:20px;padding:20px;margin-top:18px;transition:border-color .4s,background .4s}
+.ex.done{border-color:#1F9D57;background:#F2FBF6}
+.ex h3{font-size:18px;color:var(--blue);margin-bottom:8px}.story{line-height:1.55;margin-bottom:12px}
+.ans{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.ans label{display:flex;align-items:center;gap:8px;font-weight:700}
+.ans input{width:96px;min-height:46px;border:2px solid var(--line);border-radius:12px;padding:0 10px;font-size:16px;text-align:center}
+.ans input:focus,.ans select:focus{border-color:var(--blue2);outline:none}
+.ans select{max-width:360px}
+.fb{margin-top:12px;font-weight:600;line-height:1.5;min-height:1.4em}.fb.good{color:#1F7A47}.fb.bad{color:#9A2A12}
+.hn{margin-top:10px;background:var(--yel);border-radius:12px;padding:12px 14px;line-height:1.5}
+.ex .o{display:block;width:100%;max-width:600px;text-align:left;min-height:48px;margin-top:10px;border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 18px;font-size:16px;color:var(--ink)}
+.ex .o.ok{border-color:#1F9D57;background:#E8F8EE}.ex .o.no{border-color:var(--red);background:#FFF1F2}
+.tab td.yes{color:#1F7A47;font-weight:800}.tab td.no2{color:var(--red);font-weight:800}
+#sform input.bad{border-color:var(--red);background:#FFF1F2}
+.team{list-style:none;margin:16px 0 0;padding:0;text-align:left;max-height:48vh;overflow-y:auto}
+.team li{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.team li:last-child{border:0}
+.av2{width:42px;height:42px;border-radius:50%;color:#fff;font-weight:800;display:grid;place-items:center;flex:none;font-size:15px}
+.team b{display:block;font-size:15px;line-height:1.25}.team small{color:var(--mut);font-size:13px}
+.tabs2{overflow-x:auto;flex-wrap:nowrap}.tabs2 button{white-space:nowrap}
+
+.team:focus-visible{outline:2px solid var(--blue2);outline-offset:2px;border-radius:8px}

@@ -101,3 +101,73 @@ window.TOPICS = [
   examples: [{ name: 'Con M', p: P.inf, m: 'bigM' }, { name: 'Con dos fases', p: P.inf, m: 'twophase' }] }
 ];
 })();
+
+/* ---------- Ejemplos resueltos (story) y ejercicios de práctica ---------- */
+(function () {
+'use strict';
+const BI = [{ a: [1, 1], op: '<=', b: 12 }, { a: [2, 1], op: '<=', b: 16 }];
+const B = {
+  bici: { type: 'max', c: [40, 30], cons: BI },
+  reddy: { type: 'max', c: [5, 4], cons: [{ a: [6, 4], op: '<=', b: 24 }, { a: [1, 2], op: '<=', b: 6 }] },
+  minA: { type: 'min', c: [3, 2], cons: [{ a: [2, 1], op: '>=', b: 8 }, { a: [1, 2], op: '>=', b: 10 }] },
+  minneg2: { type: 'min', c: [-40, -30], cons: BI },
+  h2: { type: 'max', c: [3, 2, 4], cons: [{ a: [1, 1, 2], op: '<=', b: 4 }, { a: [2, 0, 3], op: '<=', b: 5 }, { a: [2, 1, 3], op: '<=', b: 7 }] },
+  tf: { type: 'min', c: [4, 1], cons: [{ a: [3, 1], op: '=', b: 3 }, { a: [4, 3], op: '>=', b: 6 }, { a: [1, 2], op: '<=', b: 4 }] },
+  mx: { type: 'max', c: [1, 2], cons: [{ a: [1, 1], op: '>=', b: 2 }, { a: [1, 1], op: '<=', b: 6 }, { a: [0, 1], op: '<=', b: 4 }] },
+  dg: { type: 'max', c: [1, 2], cons: [{ a: [1, 0], op: '<=', b: 4 }, { a: [0, 1], op: '<=', b: 4 }, { a: [1, 1], op: '<=', b: 8 }] },
+  al: { type: 'max', c: [2, 2], cons: [{ a: [1, 1], op: '<=', b: 6 }, { a: [1, 0], op: '<=', b: 4 }, { a: [0, 1], op: '<=', b: 5 }] },
+  ub: { type: 'max', c: [1, 1], cons: [{ a: [1, -1], op: '<=', b: 2 }, { a: [-1, 1], op: '<=', b: 2 }] },
+  nf: { type: 'max', c: [1, 1], cons: [{ a: [1, 1], op: '<=', b: 3 }, { a: [1, 1], op: '>=', b: 5 }] }
+};
+const mc = (q, a, ok, why) => ({ t: 'mc', q, a, ok, why });
+const X = {
+  historia: { practice: [
+    mc('¿En qué año creó George Dantzig el método Simplex?', ['1947', '1984', '1958'], 0, 'Dantzig lo creó en 1947 trabajando para la Fuerza Aérea de EE. UU.'),
+    mc('¿Qué técnicas nacieron en 1957–58 para planificar proyectos grandes?', ['PERT y CPM', 'Puntos interiores', 'Planos de corte'], 0, 'PERT y CPM se usan para programar proyectos enormes.')] },
+  intro: { story: 'Una fábrica de vidrio hace ventanas (x₁) y puertas (x₂). Gana Q3 por cada ventana y Q5 por cada puerta. La planta 1 solo puede hacer 4 ventanas, la planta 2 hace 2 horas de trabajo por puerta con 12 horas disponibles, y la planta 3 usa 3 horas por ventana y 2 por puerta con 18 horas disponibles. ¿Cuántas ventanas y puertas conviene hacer para ganar lo máximo?',
+    practice: [
+      mc('Una tienda gana Q40 por bicicleta (x₁) y Q30 por patineta (x₂). ¿Cuál es la función objetivo para maximizar la ganancia?', ['Z = 40x₁ + 30x₂', 'x₁ + x₂ ≤ 12', 'Z = x₁ + x₂'], 0, 'La función objetivo suma lo que gana cada producto.'),
+      { t: 'solve', p: B.bici, story: 'Una tienda vende bicicletas (x₁) y patinetas (x₂). Hay espacio para 12 productos en total (x₁ + x₂ ≤ 12) y las horas de armado alcanzan para 2 por bicicleta y 1 por patineta con 16 horas (2x₁ + x₂ ≤ 16). Gana Q40 y Q30 respectivamente.', hint: 'Dibuja o resuelve con el Simplex. Prueba las esquinas: (0,12), (8,0) y la intersección de las dos rectas.' }] },
+  grafico: { story: 'Con la misma fábrica de vidrio (ventanas x₁ y puertas x₂) hay solo 2 variables, así que podemos dibujarla. Cada restricción es una recta, la región factible es la zona permitida y el óptimo está en una de sus esquinas.',
+    practice: [
+      { t: 'solve', p: B.reddy, story: 'Una fábrica hace pintura exterior (x₁) y pintura interior (x₂). Gana Q5 y Q4 por tonelada. La materia prima M1 alcanza para 24 (6 y 4 por tonelada) y la M2 para 6 (1 y 2 por tonelada).', hint: 'Marca las esquinas: (4,0), (0,3) y donde se cruzan las dos rectas. Evalúa Z en cada una.' },
+      { t: 'solve', p: B.minA, story: 'Una dieta necesita al menos 8 unidades de vitamina A y 10 de vitamina B. El alimento 1 cuesta Q3 y da 2 de A y 1 de B. El alimento 2 cuesta Q2 y da 1 de A y 2 de B. ¿Cómo gastar lo mínimo?', hint: 'Es de minimizar: el óptimo es la esquina con el Z más pequeño. Prueba (0,8), (10,0) y el cruce de las rectas.' }] },
+  heuristica: { story: 'Una fábrica hace 3 productos con 3 recursos limitados. En vez de resolver todo con el Simplex, usamos una regla práctica: calcular la eficiencia de cada producto, ordenarlos y asignar primero el más eficiente. Luego comparamos con el óptimo exacto.',
+    practice: [
+      { t: 'heur', p: { type: 'max', c: [5, 4, 3], cons: [{ a: [2, 3, 1], op: '<=', b: 5 }, { a: [4, 1, 2], op: '<=', b: 11 }, { a: [3, 4, 2], op: '<=', b: 8 }] }, story: 'Aplica la regla voraz: eficiencia = ganancia ÷ (suma de a/b de cada recurso). ¿Cuánto vale Z con la heurística?', hint: 'Calcula la eficiencia de x₁, x₂ y x₃, ordénalas y asigna al primero lo máximo posible.' },
+      { t: 'heur', p: B.h2, story: 'Otro problema con 3 productos. Aplica la misma regla y dime el valor de Z que obtiene la heurística.', hint: 'Recuerda restar a cada recurso lo que ya usaste antes de pasar a la siguiente variable.' }] },
+  'simplex-max': { story: 'Una fábrica de vidrio hace ventanas (x₁) y puertas (x₂) y gana Q3 y Q5 por unidad. La planta 1 permite máximo 4 ventanas (x₁ ≤ 4), la planta 2 limita las puertas (2x₂ ≤ 12) y la planta 3 usa 3 horas por ventana y 2 por puerta con 18 disponibles (3x₁ + 2x₂ ≤ 18). Resolvemos con el Simplex paso a paso.',
+    practice: [
+      { t: 'solve', p: B.bici, story: 'Resuelve con el Simplex: Máx Z = 40x₁ + 30x₂ con x₁ + x₂ ≤ 12 y 2x₁ + x₂ ≤ 16.', hint: 'Entra x₁ (el más negativo, −40). Calcula las razones 12/1 y 16/2.' },
+      { t: 'solve', p: B.h2, story: 'Resuelve con el Simplex este problema de 3 variables.', hint: 'Puedes comprobar tus tablas con el resolvedor de abajo.' }] },
+  'simplex-min': { story: 'Queremos minimizar Z = −3x₁ − 5x₂ (una pérdida) con los límites de la fábrica de vidrio: x₁ ≤ 4, 2x₂ ≤ 12 y 3x₁ + 2x₂ ≤ 18. Minimizar Z es lo mismo que maximizar −Z, así que resolvemos como un problema de maximización y al final devolvemos el signo.',
+    practice: [
+      { t: 'solve', p: B.minneg2, story: 'Min Z = −40x₁ − 30x₂ con x₁ + x₂ ≤ 12 y 2x₁ + x₂ ≤ 16. Pasa a maximizar −Z y resuelve. Recuerda devolver el signo.', hint: 'Max (−Z) = 40x₁ + 30x₂. Cuando termines, Z = −(valor de −Z).' },
+      { t: 'solve', p: B.minA, story: 'Dieta: Min Z = 3x₁ + 2x₂ con 2x₁ + x₂ ≥ 8 y x₁ + 2x₂ ≥ 10. Como hay ≥, el resolvedor usará dos fases.', hint: 'Compara con el método gráfico: la esquina óptima es el cruce de las dos rectas.' }] },
+  'dos-fases': { story: 'Mezcla de dos ingredientes: Min Z = 0.4x₁ + 0.5x₂ con 0.3x₁ + 0.1x₂ ≤ 2.7, 0.5x₁ + 0.5x₂ = 6 y 0.6x₁ + 0.4x₂ ≥ 6. Como hay una igualdad y un ≥, necesitamos variables artificiales y trabajar en dos fases.',
+    practice: [
+      { t: 'solve', p: B.tf, story: 'Resuelve con dos fases: Min Z = 4x₁ + x₂ con 3x₁ + x₂ = 3, 4x₁ + 3x₂ ≥ 6, x₁ + 2x₂ ≤ 4.', hint: 'Fase 1: minimiza W = a₁ + a₂. Si W = 0, pasa a la Fase 2.' },
+      { t: 'solve', p: B.minA, story: 'Dieta: Min Z = 3x₁ + 2x₂ con 2x₁ + x₂ ≥ 8 y x₁ + 2x₂ ≥ 10.', hint: 'Tienes dos restricciones ≥, así que hay dos artificiales en la Fase 1.' }] },
+  m: { story: 'La misma mezcla: Min Z = 0.4x₁ + 0.5x₂ con 0.3x₁ + 0.1x₂ ≤ 2.7, 0.5x₁ + 0.5x₂ = 6 y 0.6x₁ + 0.4x₂ ≥ 6. Ahora usamos el Método de la M: a las variables artificiales les ponemos un castigo enorme M en Z.',
+    practice: [
+      { t: 'solve', p: B.mx, story: 'Máx Z = x₁ + 2x₂ con x₁ + x₂ ≥ 2, x₁ + x₂ ≤ 6 y x₂ ≤ 4. Usa el Método de la M.', hint: 'La restricción ≥ lleva exceso y artificial. En la fila Z aparecerán términos con M.' },
+      { t: 'solve', p: B.tf, story: 'Min Z = 4x₁ + x₂ con 3x₁ + x₂ = 3, 4x₁ + 3x₂ ≥ 6 y x₁ + 2x₂ ≤ 4.', hint: 'Dos artificiales (R₁ y R₂): sácalas de la base con los pivotes.' }] },
+  degeneracion: { story: 'Máx Z = 3x₁ + 9x₂ con x₁ + 4x₂ ≤ 8 y x₁ + 2x₂ ≤ 4. Al elegir la fila pivote hay empate en la razón mínima (8/4 = 4/2 = 2): eso produce degeneración.',
+    practice: [
+      { t: 'classify', p: B.dg, story: 'Máx Z = x₁ + 2x₂ con x₁ ≤ 4, x₂ ≤ 4 y x₁ + x₂ ≤ 8. ¿Qué tipo de solución tiene?', hint: 'Fíjate si en alguna iteración hay empate en la razón mínima.' },
+      { t: 'solve', p: B.dg, story: 'Mismo problema: ¿cuáles son los valores óptimos?', hint: 'Las tres restricciones se cruzan en una sola esquina.' }] },
+  alternativos: { story: 'Máx Z = 2x₁ + 4x₂ con x₁ + 2x₂ ≤ 5 y x₁ + x₂ ≤ 4. La recta de Z es paralela a x₁ + 2x₂ = 5, así que toda esa arista da el mismo Z.',
+    practice: [
+      { t: 'classify', p: B.al, story: 'Máx Z = 2x₁ + 2x₂ con x₁ + x₂ ≤ 6, x₁ ≤ 4 y x₂ ≤ 5. ¿Qué tipo de solución tiene?', hint: 'Compara los coeficientes de Z con los de la restricción x₁ + x₂ ≤ 6.' },
+      { t: 'solve', p: B.al, ask: 'Z', story: 'Mismo problema: ¿cuánto vale Z en el óptimo? (Es el mismo en todas las soluciones óptimas).', hint: 'Evalúa Z en (4,2) o en (1,5).' }] },
+  'no-acotada': { story: 'Máx Z = 2x₁ + x₂ con x₁ − x₂ ≤ 10 y 2x₁ ≤ 40. Nada limita a x₂ hacia arriba, así que Z puede crecer sin fin.',
+    practice: [
+      { t: 'classify', p: B.ub, story: 'Máx Z = x₁ + x₂ con x₁ − x₂ ≤ 2 y −x₁ + x₂ ≤ 2. ¿Qué tipo de solución tiene?', hint: 'Prueba con x₁ = x₂ = 10, 100, 1000. ¿Se cumplen las restricciones?' },
+      { t: 'classify', p: { type: 'max', c: [2, 1], cons: [{ a: [1, -1], op: '<=', b: 10 }, { a: [2, 0], op: '<=', b: 40 }] }, story: 'Máx Z = 2x₁ + x₂ con x₁ − x₂ ≤ 10 y 2x₁ ≤ 40. ¿Qué tipo de solución tiene?', hint: '¿Qué restricción limita a x₂? Mira si alguna lo hace.' }] },
+  'no-factible': { story: 'Máx Z = 3x₁ + 2x₂ con 2x₁ + x₂ ≤ 2 y 3x₁ + 4x₂ ≥ 12. La primera restricción limita demasiado y la segunda exige demasiado: no existe ningún punto que cumpla ambas.',
+    practice: [
+      { t: 'classify', p: B.nf, story: 'Máx Z = x₁ + x₂ con x₁ + x₂ ≤ 3 y x₁ + x₂ ≥ 5. ¿Qué tipo de solución tiene?', hint: '¿Puede una suma ser a la vez menor o igual que 3 y mayor o igual que 5?' },
+      { t: 'classify', p: { type: 'max', c: [3, 2], cons: [{ a: [2, 1], op: '<=', b: 2 }, { a: [3, 4], op: '>=', b: 12 }] }, story: 'Máx Z = 3x₁ + 2x₂ con 2x₁ + x₂ ≤ 2 y 3x₁ + 4x₂ ≥ 12. ¿Qué tipo de solución tiene?', hint: 'Del primer límite, x₂ ≤ 2 y x₁ ≤ 1. ¿Cuánto vale entonces como máximo 3x₁ + 4x₂?' }] }
+};
+window.TOPICS.forEach(t => Object.assign(t, X[t.id] || {}));
+})();
