@@ -82,7 +82,7 @@ button{cursor:pointer;touch-action:manipulation}
 .cc h3{font-size:19px;color:var(--blue);margin-bottom:8px}.cc p{line-height:1.55;color:#1E3A57;font-size:16px}
 .les .lh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .dots{display:flex;gap:6px}.dots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .4s var(--ease)}.dots i.on{background:var(--red);width:22px;border-radius:9px}
-.lt{font-size:clamp(1.1rem,2.2vw,1.35rem);line-height:1.55;margin:16px 0 20px;min-height:4.6em;animation:in .5s var(--ease)}
+.lt{font-size:clamp(1.1rem,2.2vw,1.35rem);line-height:1.55;margin:16px 0 20px;min-height:3.4em;animation:in .5s var(--ease)}
 .lb{display:flex;gap:10px;flex-wrap:wrap}
 .quiz button.o{display:block;width:100%;max-width:600px;text-align:left;min-height:48px;margin-top:10px;border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 18px;font-size:16px;color:var(--ink);transition:transform .3s var(--ease),border-color .3s}
 .quiz button.o:hover{transform:translateX(6px);border-color:var(--blue2)}
@@ -102,7 +102,7 @@ button{cursor:pointer;touch-action:manipulation}
 .ti h3{font-size:19px;margin:8px 0 4px;color:var(--blue)}.ti p{line-height:1.5;color:#2B4560}
 
 /* solver */
-.sset{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:18px}
+.sset{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:18px}
 .fld>span{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:var(--mut)}
 select,.fld input{width:100%;min-height:48px;border:2px solid var(--line);border-radius:14px;padding:0 12px;font-size:16px;background:#fff;color:var(--ink)}
 .stp{display:flex;align-items:center;border:2px solid var(--line);border-radius:14px;height:48px;overflow:hidden;background:#fff}
@@ -230,3 +230,18 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none}
 .tabs2{overflow-x:auto;flex-wrap:nowrap}.tabs2 button{white-space:nowrap}
 
 .team:focus-visible{outline:2px solid var(--blue2);outline-offset:2px;border-radius:8px}
+
+/* desplegable de práctica y botones desactivados */
+#prac{padding:0}
+.dt summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:64px;padding:16px 24px;cursor:pointer;border-radius:26px}
+.dt summary::-webkit-details-marker{display:none}
+.dt summary span{font-size:22px;font-weight:800}.dt summary em{font-style:normal;font-weight:500;color:var(--mut);font-size:16px}
+.dt summary small{color:var(--mut);font-size:14px;margin-left:auto}
+.dt summary:after{content:"";width:12px;height:12px;border-right:3px solid var(--blue);border-bottom:3px solid var(--blue);transform:rotate(45deg);transition:transform .3s var(--ease);margin:0 6px 4px 4px}
+.dt[open] summary:after{transform:rotate(-135deg);margin-bottom:-4px}
+.dt[open] summary small{display:none}
+.dt summary:hover{background:var(--bg)}
+.dtb{padding:0 24px 24px;animation:in .5s var(--ease)}
+.btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.btn:disabled:hover{transform:none;box-shadow:none}
+.srow select[hidden]{display:none}

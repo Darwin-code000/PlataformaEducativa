@@ -105,7 +105,7 @@ function solve(p, method) {
   let st, c;
   if (method === 'twophase' && hasArt) {
     const c1 = cvec(T, 1, method);
-    st = run(T, c1, res.steps, ctx, 'Fase 1 (eliminar variables artificiales)', 'W');
+    st = run(T, c1, res.steps, ctx, 'Fase 1 (eliminar variables artificiales)', '−W');
     const w = row0(T, c1).zv[0];
     if (st.status !== 'optimal' || w < -1e-7) { res.status = 'infeasible'; res.msg = 'Al terminar la Fase 1 las variables artificiales no llegaron a 0 (W ≠ 0): las restricciones se contradicen.'; return res; }
     for (let i = T.A.length - 1; i >= 0; i--) {

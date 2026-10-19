@@ -82,11 +82,10 @@ SV.innerHTML = `<h2>Resolvedor de problemas</h2><p class="mut">Escribe tu proble
 <div class="fld"><span>Variables</span><div class="stp"><button id="vM" aria-label="Menos variables">−</button><b id="vN">2</b><button id="vP" aria-label="Más variables">+</button></div></div>
 <div class="fld"><span>Restricciones</span><div class="stp"><button id="rM" aria-label="Menos restricciones">−</button><b id="rN">3</b><button id="rP" aria-label="Más restricciones">+</button></div></div>
 <div class="fld"><span>Método</span><select id="smeth"><option value="auto">Automático</option><option value="simplex">Simplex</option><option value="bigM">Método de la M</option><option value="twophase">Dos fases</option><option value="graph">Gráfico (2 variables)</option><option value="heur">Heurística</option></select></div>
-<div class="fld"><span>Fila Z de la tabla</span><select id="sconv"><option value="zc">Zⱼ − Cⱼ (entra el más negativo)</option><option value="cz">Cⱼ − Zⱼ (entra el más positivo)</option></select></div>
+<div class="fld"><span>Fila Z de la tabla</span><select id="sconv"><option value="zc">Zⱼ − Cⱼ (más negativo)</option><option value="cz">Cⱼ − Zⱼ (más positivo)</option></select></div>
 </div>
 <div id="sform"></div>
 <div class="srow"><button class="btn red" id="sRun">Resolver</button><button class="btn out" id="sClr">Limpiar</button><select id="sEx" aria-label="Cargar ejemplo"></select></div>
-<div class="chips2" id="chips"></div>
 <div id="sres" hidden></div>`;
 
 function normalize() {
@@ -121,10 +120,14 @@ function load(p, m, go) {
   $('#smeth', SV).value = m || 'auto'; form();
   if (go) { run(); $('#sres', SV).scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
-function setChips(list) { S.ex = list; $('#chips', SV).innerHTML = list.map((e, i) => `<button data-ex="${i}">${e.name}</button>`).join(''); $('#chips', SV).hidden = !list.length; }
+function setExamples(list) {
+  S.ex = list; const s = $('#sEx', SV);
+  s.innerHTML = '<option value="">Cargar otro ejemplo…</option>' + list.map((e, i) => `<option value="${i}">${e.name}</option>`).join('');
+  s.hidden = list.length < 2;
+}
 function fillSelect() {
   const all = []; TOP.forEach(t => (t.examples || []).forEach(e => all.push(Object.assign({}, e, { name: NAV[t.id] + ': ' + e.name }))));
-  S.all = all; $('#sEx', SV).innerHTML = '<option value="">Cargar un ejemplo…</option>' + all.map((e, i) => `<option value="${i}">${e.name}</option>`).join('');
+  S.all = all;
 }
 function run() {
   const bad = read();
@@ -138,7 +141,7 @@ function run() {
 }
 function show() {
   const r = S.res, hasSteps = r.steps.length > 0, two = S.p.c.length === 2, okSol = r.status === 'optimal' || r.status === 'multiple';
-  const tabs = [['model', 'Modelo', true], ['steps', 'Paso a paso', hasSteps], ['graph', 'Gráfica', two], ['heur', 'Heurística', true], ['check', 'Comprobación', okSol]].filter(t => t[2]);
+  const tabs = [['model', 'Modelo', true], ['steps', 'Paso a paso', hasSteps], ['graph', 'Gráfica', two], ['heur', 'Heurística', S.heur.ok || $('#smeth', SV).value === 'heur'], ['check', 'Comprobación', okSol]].filter(t => t[2]);
   if (!tabs.some(t => t[0] === S.tab)) S.tab = tabs[0][0];
   const el = $('#sres', SV); el.hidden = false;
   el.innerHTML = banner(S.p, r) + '<div class="tabs2" role="tablist">' + tabs.map(t => `<button role="tab" data-tab="${t[0]}" class="${S.tab === t[0] ? 'on' : ''}">${t[1]}</button>`).join('') + '</div><div class="pane2" id="pane"></div>';
@@ -176,7 +179,6 @@ SV.addEventListener('click', e => {
   if (b.id === 'sClr') { S.c = Array(S.n).fill(0); S.rows.forEach(r => { r.a = Array(S.n).fill(0); r.b = 0; }); form(); $('#sres', SV).hidden = true; return; }
   const dn = { vM: ['n', -1, 2, 5], vP: ['n', 1, 2, 5], rM: ['m', -1, 1, 6], rP: ['m', 1, 1, 6] }[b.id];
   if (dn) { read(); S[dn[0]] = Math.min(dn[3], Math.max(dn[2], S[dn[0]] + dn[1])); return form(); }
-  if (b.dataset.ex !== undefined) { const x = S.ex[+b.dataset.ex]; return load(x.p, x.m, true); }
   if (b.dataset.tab) { S.tab = b.dataset.tab; $$('[data-tab]', SV).forEach(t => t.classList.toggle('on', t === b)); return pane(); }
   const a = b.dataset.act; if (!a) return;
   if (a === 'prev') { if (S.si > 0) { S.si--; step(); } }
@@ -186,7 +188,7 @@ SV.addEventListener('click', e => {
   else if (a.startsWith('m:')) { $('#smeth', SV).value = a.slice(2); run(); }
 });
 SV.addEventListener('input', e => { if (e.target.classList.contains('bad')) { e.target.classList.remove('bad'); e.target.removeAttribute('aria-invalid'); } });
-$('#sEx', SV).addEventListener('change', e => { if (e.target.value === '') return; const x = S.all[+e.target.value]; load(x.p, x.m, true); e.target.value = ''; });
+$('#sEx', SV).addEventListener('change', e => { if (e.target.value === '') return; const x = S.ex[+e.target.value]; load(x.p, x.m, true); e.target.value = ''; });
 $('#sconv', SV).addEventListener('change', e => { S.conv = e.target.value; if (S.res && !$('#sres', SV).hidden && S.tab === 'steps') pane(); });
 
 /* ---------- ejemplo resuelto ---------- */
@@ -218,7 +220,13 @@ function walkUI(root, t) {
     const s = steps[k]; const el = document.createElement('article'); el.className = 'ws';
     el.innerHTML = `<span class="wn">${k + 1}</span><div class="wb"><h3>${s.h}</h3>${s.html}</div>`; wl.appendChild(el); k++;
     if (s.after) s.after(el);
-    $('#wc', root).textContent = `Paso ${k} de ${steps.length}`; $('[data-w="n"]', root).disabled = k >= steps.length;
+    sync();
+  };
+  const sync = () => {
+    const done = k >= steps.length, n = $('[data-w="n"]', root), all = $('[data-w="a"]', root);
+    n.disabled = done; all.disabled = done;
+    n.textContent = done ? 'Ya mostraste todos los pasos' : 'Mostrar siguiente paso'; all.textContent = done ? 'Todo mostrado' : 'Mostrar todo';
+    $('#wc', root).textContent = done ? `¡Listo! Ya viste los ${steps.length} pasos. Pulsa "Empezar de nuevo" si quieres repasar.` : `Paso ${k} de ${steps.length}`;
   };
   add();
   root.addEventListener('click', e => {
@@ -252,7 +260,7 @@ function checkEx(e, art) {
   return { ok: !wrong.length, empty, wrong, answer: (e.ask === 'Z' ? '' : r.x.map((v, j) => `x${j + 1} = ${IO.fr(v)}`).join(', ') + ', ') + 'Z = ' + IO.fr(r.z) };
 }
 function practiceUI(root, t) {
-  root.innerHTML = '<h2>Practica tú</h2><p class="mut">Resuelve en tu cuaderno y comprueba tu respuesta. Puedes escribir fracciones como 15/2 o decimales como 7.5.</p>' + t.practice.map((e, i) => exHTML(e, i, t)).join('');
+  root.innerHTML = '<details class="dt"><summary><span>Practica tú <em>(opcional)</em></span><small>Toca para ver los ejercicios</small></summary><div class="dtb"><p class="mut">Resuelve en tu cuaderno y comprueba tu respuesta. Puedes escribir fracciones como 15/2 o decimales como 7.5.</p>' + t.practice.map((e, i) => exHTML(e, i, t)).join('') + '</div></details>';
   root.addEventListener('click', ev => {
     const art = ev.target.closest('.ex'); if (!art) return; const e = t.practice[+art.dataset.i], fb = $('.fb', art);
     const set = (txt, cls) => { fb.textContent = txt; fb.className = 'fb ' + cls; };
@@ -306,10 +314,10 @@ function renderTopic(t) {
 ${t.kind === 'history' ? `<div class="tl" id="tl">${HIS.map(h => `<article class="ti"><span class="yr">${h[0]}</span><h3>${h[1]}</h3><p>${h[2]}</p></article>`).join('')}</div>` : ''}
 ${t.story ? '<section class="card" id="walk"></section>' : ''}<section class="card" id="prac"></section><div id="slot"></div><section class="card quiz" id="quiz"></section>
 <nav class="pn">${prev ? `<a href="#/t/${prev.id}">← ${NAV[prev.id]}</a>` : '<span></span>'}${next ? `<a href="#/t/${next.id}">${NAV[next.id]} →</a>` : '<a href="#/solver">Resolvedor →</a>'}</nav></div>`;
-  lessonUI($('#les'), t.lesson, t.tool ? ['Probar en el resolvedor', () => { setChips(t.examples); const x = t.examples[0]; load(x.p, x.m, true); }] : ['Ir a la pregunta', () => $('#quiz').scrollIntoView({ behavior: 'smooth', block: 'center' })]);
+  lessonUI($('#les'), t.lesson, t.tool ? ['Probar en el resolvedor', () => { const x = t.examples[0]; load(x.p, x.m, true); }] : ['Ir a la pregunta', () => $('#quiz').scrollIntoView({ behavior: 'smooth', block: 'center' })]);
   if (t.story) walkUI($('#walk'), t);
   practiceUI($('#prac'), t); quizUI($('#quiz'), t.quiz, t.id);
-  if (t.tool) { $('#slot').appendChild(SV); $('#sEx', SV).hidden = true; setChips(t.examples); load(t.examples[0].p, t.examples[0].m, false); $('#sres', SV).hidden = true; }
+  if (t.tool) { $('#slot').appendChild(SV); setExamples(t.examples); load(t.examples[0].p, t.examples[0].m, false); $('#sres', SV).hidden = true; }
   if (t.kind === 'history') revealTimeline();
 }
 function revealTimeline() {
@@ -320,7 +328,7 @@ function revealTimeline() {
 function renderSolver() {
   $('#tt').textContent = 'Resolvedor';
   view.innerHTML = '<div class="page"><header class="tban" style="--c:#712CF9"><span class="tn">Σ</span><div><h1>Resolvedor</h1><p>Resuelve tus propios problemas de programación lineal y mira cada paso.</p></div></header><div id="slot"></div></div>';
-  $('#slot').appendChild(SV); $('#sEx', SV).hidden = false; setChips([]);
+  $('#slot').appendChild(SV); setExamples(S.all);
 }
 function markNav() { const k = current(); $$('#nav a').forEach(a => a.classList.toggle('on', a.dataset.r === k)); }
 function current() { const h = location.hash.replace(/^#\/?/, '') || 'home', [r, id] = h.split('/'); return r === 't' && TOP.some(t => t.id === id) ? 't/' + id : r === 'solver' ? 'solver' : 'home'; }
@@ -339,7 +347,7 @@ const mob = () => innerWidth <= 900;
 const steps = [
   { h: '¡Hola! Bienvenido', p: 'Esta plataforma te enseña Investigación de Operaciones con animaciones, ejemplos resueltos, ejercicios y un resolvedor. Te muestro cómo usarla en 4 pasos.' },
   { t: () => mob() ? '#bMenu' : '#side', h: '1. Menú de temas', p: 'Aquí están los 12 temas, desde la historia hasta los casos especiales del Simplex. Los que completes se marcan con una palomita.' },
-  { t: () => $('.tgrid') ? '.tgrid' : '#view', h: '2. Cada tema tiene 5 partes', p: 'Explicación con ejemplos, lección guiada, un ejemplo resuelto paso a paso, ejercicios con corrección y una pregunta final.' },
+  { t: () => $('.tgrid') ? '.tgrid' : '#view', h: '2. Cada tema tiene 5 partes', p: 'Explicación con ejemplos, lección guiada, un ejemplo resuelto paso a paso, ejercicios opcionales con corrección y una pregunta final.' },
   { t: () => mob() ? '#bMenu' : 'a[data-r="solver"]', h: '3. El resolvedor', p: 'Escribe tu problema o carga un ejemplo y elige un método. Verás el modelo, las tablas del Simplex, la gráfica y la comprobación.' },
   { t: () => '#bAbout', h: '4. Quién lo hizo', p: 'Aquí están los integrantes del equipo. ¡Ahora empieza a aprender!' }
 ];
